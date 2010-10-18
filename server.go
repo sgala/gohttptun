@@ -30,13 +30,13 @@ type proxyPacket struct {
 
 func NewProxy(key, destAddr string) (p *proxy, err os.Error) {
 	p = &proxy{C: make(chan proxyPacket), key: key}
-	log.Stderr("Attempting connect", destAddr)
+	log.Println("Attempting connect", destAddr)
 	p.conn, err = net.Dial("tcp", "", destAddr)
 	if err != nil {
 		return
 	}
 	p.conn.SetReadTimeout(readTimeout)
-	log.Stderr("Connected", destAddr)
+	log.Println("Connected", destAddr)
 	return
 }
 
@@ -46,7 +46,7 @@ func (p *proxy) handle(pp proxyPacket) {
 	pp.r.Body.Close()
 	if err == os.EOF {
 		p.conn = nil
-		log.Stderr("eof", p.key)
+		log.Println("eof", p.key)
 		return
 	}
 	// read out of the buffer and write it to conn
@@ -95,13 +95,13 @@ func proxyMuxer() {
 			// read key
 			n, err := pp.r.Body.Read(key)
 			if n != keyLen || err != nil {
-				log.Stderr("Couldn't read key", key)
+				log.Println("Couldn't read key", key)
 				continue
 			}
 			// find proxy
 			p, ok := proxyMap[string(key)]
 			if !ok {
-				log.Stderr("Couldn't find proxy", key)
+				log.Println("Couldn't find proxy", key)
 				continue
 			}
 			// handle
