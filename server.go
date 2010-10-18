@@ -23,7 +23,7 @@ type proxy struct {
 }
 
 type proxyPacket struct {
-	c    *http.Conn
+	c    http.ResponseWriter
 	r    *http.Request
 	done chan bool
 }
@@ -58,13 +58,13 @@ func (p *proxy) handle(pp proxyPacket) {
 var queue = make(chan proxyPacket)
 var createQueue = make(chan *proxy)
 
-func handler(c *http.Conn, r *http.Request) {
+func handler(c http.ResponseWriter, r *http.Request) {
 	pp := proxyPacket{c, r, make(chan bool)}
 	queue <- pp
 	<-pp.done // wait until done before returning
 }
 
-func createHandler(c *http.Conn, r *http.Request) {
+func createHandler(c http.ResponseWriter, r *http.Request) {
 	// read destAddr
 	destAddr, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
